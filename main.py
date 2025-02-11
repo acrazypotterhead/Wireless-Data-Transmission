@@ -25,7 +25,7 @@ class Client(App):
         g = GridLayout(cols=1)
         b = Button(on_release=self.go)
         self.l = Label()
-        self.host = TextInput(text='192.168.0.6')
+        self.host = TextInput(text='192.168.56.1')
         g.add_widget(b)
         g.add_widget(self.host)
         g.add_widget(self.l)

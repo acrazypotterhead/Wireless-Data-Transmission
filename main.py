@@ -1,21 +1,19 @@
+import socket
+import time
+import threading
+import logging
 from kivy.app import App
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
-import socket
-import threading
-#from pyobjus import autoclass  # Specific to iOS
-
-# Client using iPhone and kivy
-
-import time
 from kivy.uix.textinput import TextInput
 
+# Configure logging
+logging.basicConfig(filename='client.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-# This client code was built using python 2 when building the kivy ios project
 class Client(App):
-    
     counter = 0
+
     def build(self):
         # Specific to iOS
         #Bridge = autoclass('bridge')
@@ -33,26 +31,38 @@ class Client(App):
         return g
 
     def go(self, *args):
-        #HOST = '192.168.0.6'  # The server's hostname or IP address
-        HOST = self.host.text
-        PORT = 65436  # The port used by the server
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect((HOST, PORT))
+        try:
+            HOST = self.host.text
+            PORT = 65436  # The port used by the server
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            logging.debug(f"Tentative de connexion à {HOST}:{PORT}")
+            self.s.connect((HOST, PORT))
+            logging.debug("Connexion réussie")
 
-
-        threading.Thread(target=self.run_loop).start() 
+            # Exécuter la boucle dans un thread séparé
+            threading.Thread(target=self.run_loop).start()
+        except Exception as e:
+            logging.error(f"Erreur lors de la connexion : {e}")
 
     def run_loop(self):
-        while True:
-            time.sleep(.25)
-            self.send_msg()
+        try:
+            while True:
+                time.sleep(.25)
+                self.send_msg()
+        except Exception as e:
+            logging.error(f"Erreur dans run_loop : {e}")
 
     def send_msg(self, *args):
-        
-        gyro_data = "hello world"
-        self.s.sendall(str(gyro_data))
+        try:
+            gyro_data = "hello world"
+            self.s.sendall(str(gyro_data).encode('utf-8'))
+            logging.debug("Message envoyé")
+        except Exception as e:
+            logging.error(f"Erreur lors de l'envoi du message : {e}")
 
     def on_stop(self):
-        self.s.close()
+        if self.s:
+            self.s.close()
+            logging.debug("Connexion fermée")
 
 Client().run()

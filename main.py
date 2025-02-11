@@ -3,6 +3,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 import socket
+import threading
 #from pyobjus import autoclass  # Specific to iOS
 
 # Client using iPhone and kivy
@@ -32,12 +33,16 @@ class Client(App):
         return g
 
     def go(self, *args):
-        HOST = '192.168.0.6'  # The server's hostname or IP address
+        #HOST = '192.168.0.6'  # The server's hostname or IP address
         HOST = self.host.text
         PORT = 65436  # The port used by the server
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((HOST, PORT))
 
+
+        threading.Thread(target=self.run_loop).start() 
+
+    def run_loop(self):
         while True:
             time.sleep(.25)
             self.send_msg()
